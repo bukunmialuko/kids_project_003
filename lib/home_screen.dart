@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:math_expressions/math_expressions.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -13,9 +14,9 @@ class _HomeScreenState extends State<HomeScreen> {
   // var whitish = #c4ebe8
   // https://imagecolorpicker.com/en amazing website, it shows complimentary colors
 
-  num numberOnScreen = 0;
-  num numberInMemory = 0;
-  String operation = "";
+  // num numberOnScreen = 0;
+  // num numberInMemory = 0;
+  // String operation = "";
 
   @override
   Widget build(BuildContext context) {
@@ -38,37 +39,64 @@ class _HomeScreenState extends State<HomeScreen> {
             Spacer(),
             Row(
               children: [
-                Expanded(child: ResultScreen(value: "$numberOnScreen")),
-                ClearSquareButton(operationSign: "c"),
+                Expanded(child: ResultScreen(value: _history)),
+                ClearSquareButton(operationSign: "c", callback: allClear),
               ],
             ),
             Row(
               children: [
-                NumberSquareButton(number: 1),
-                NumberSquareButton(number: 2),
-                NumberSquareButton(number: 3),
+                NumberSquareButton(
+                  value: '1',
+                  callback: numClick,
+                ),
+                NumberSquareButton(value: '2', callback: numClick),
+                NumberSquareButton(
+                  value: '3',
+                  callback: numClick,
+                ),
                 OperationSquareButton(
                   operationSign: "+",
+                  callback: numClick,
                 )
               ],
             ),
             Row(
               children: [
-                NumberSquareButton(number: 4),
-                NumberSquareButton(number: 5),
-                NumberSquareButton(number: 6),
+                NumberSquareButton(
+                  value: '4',
+                  callback: numClick,
+                ),
+                NumberSquareButton(
+                  value: '5',
+                  callback: numClick,
+                ),
+                NumberSquareButton(
+                  value: '6',
+                  callback: numClick,
+                ),
                 OperationSquareButton(
                   operationSign: "-",
+                  callback: numClick,
                 )
               ],
             ),
             Row(
               children: [
-                NumberSquareButton(number: 7),
-                NumberSquareButton(number: 8),
-                NumberSquareButton(number: 9),
+                NumberSquareButton(
+                  value: "7",
+                  callback: numClick,
+                ),
+                NumberSquareButton(
+                  value: "8",
+                  callback: numClick,
+                ),
+                NumberSquareButton(
+                  value: "9",
+                  callback: numClick,
+                ),
                 OperationSquareButton(
                   operationSign: "*",
+                  callback: numClick,
                 )
               ],
             ),
@@ -76,13 +104,16 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 OperationSquareButton(
                   operationSign: "/",
+                  callback: numClick,
                 ),
-                NumberSquareButton(number: 0),
+                NumberSquareButton(value: "0", callback: numClick),
                 OperationSquareButton(
                   operationSign: ".",
+                  callback: numClick,
                 ),
                 OperationSquareButton(
                   operationSign: "=",
+                  callback: evaluate,
                 )
               ],
             )
@@ -92,125 +123,121 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void reset() {
-    numberInMemory = 0;
-    numberOnScreen = 0;
-    operation = "";
-  }
+  String _history = '';
+  String _expression = '';
 
-  num addNumbers(num x, num y) {
-    return x + y;
-  }
-
-  num subtractNumbers(num x, num y) {
-    return x + y;
-  }
-
-  num divideNumbers(num x, num y) {
-    return x / y;
-  }
-
-  num multiplyNumbers(num x, num y) {
-    return x * y;
-  }
-
-  void setOperation(String v) {
+  void numClick(String text) {
     setState(() {
-      operation = v;
+      _expression += text;
     });
   }
 
-  void calculate() {
-    switch (operation) {
-      case "+":
-        setState(() {
-          numberOnScreen = numberOnScreen + numberInMemory;
-        });
-        break;
+  void allClear(String text) {
+    setState(() {
+      _history = '';
+      _expression = '';
+    });
+  }
 
-      case "-":
-        setState(() {
-          numberOnScreen = numberOnScreen - numberInMemory;
-        });
-        break;
+  void clear(String text) {
+    setState(() {
+      _expression = '';
+    });
+  }
 
-      case "/":
-        setState(() {
-          numberOnScreen = numberInMemory / numberOnScreen;
-        });
-        break;
+  void evaluate(String text) {
+    Parser p = Parser();
+    Expression exp = p.parse(_expression);
+    ContextModel cm = ContextModel();
 
-      case "*":
-        setState(() {
-          numberOnScreen = numberOnScreen * numberInMemory;
-        });
-        break;
-
-      default:
-      // may show toast
-    }
+    setState(() {
+      _history = _expression;
+      _expression = exp.evaluate(EvaluationType.REAL, cm).toString();
+    });
   }
 }
 
 class NumberSquareButton extends StatelessWidget {
-  final num number;
-  const NumberSquareButton({Key? key, required this.number}) : super(key: key);
+  final String value;
+  final Function callback;
+  const NumberSquareButton(
+      {Key? key, required this.value, required this.callback})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     var unitCell = (MediaQuery.of(context).size.width / 4) - 4;
-    return Container(
-        color: Color(0xff2d3541),
-        margin: EdgeInsets.all(2),
-        width: unitCell,
-        height: unitCell,
-        child: Center(
-            child: Text(
-          "$number",
-          style: TextStyle(color: Color(0xffc4ebe8)),
-        )));
+    return GestureDetector(
+      onTap: () {
+        callback(value);
+      },
+      child: Container(
+          color: Color(0xff2d3541),
+          margin: EdgeInsets.all(2),
+          width: unitCell,
+          height: unitCell,
+          child: Center(
+              child: Text(
+            value,
+            style: TextStyle(color: Color(0xffc4ebe8)),
+          ))),
+    );
   }
 }
 
 class OperationSquareButton extends StatelessWidget {
   final String operationSign;
-  const OperationSquareButton({Key? key, required this.operationSign})
+  final Function callback;
+  const OperationSquareButton(
+      {Key? key, required this.operationSign, required this.callback})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     var unitCell = (MediaQuery.of(context).size.width / 4) - 4;
-    return Container(
-        color: Color(0xff2d3541),
-        margin: EdgeInsets.all(2),
-        width: unitCell,
-        height: unitCell,
-        child: Center(
-            child: Text(
-          operationSign,
-          style: TextStyle(color: Color(0xffc4ebe8)),
-        )));
+    return GestureDetector(
+      onTap: () {
+        callback(operationSign);
+      },
+      child: Container(
+          color: Color(0xff2d3541),
+          margin: EdgeInsets.all(2),
+          width: unitCell,
+          height: unitCell,
+          child: Center(
+              child: Text(
+            operationSign,
+            style: TextStyle(color: Color(0xffc4ebe8)),
+          ))),
+    );
   }
 }
 
 class ClearSquareButton extends StatelessWidget {
   final String operationSign;
-  const ClearSquareButton({Key? key, required this.operationSign})
+  final Function callback;
+  const ClearSquareButton(
+      {Key? key, required this.operationSign, required this.callback})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     var unitCell = (MediaQuery.of(context).size.width / 4) - 4;
-    return Container(
-        color: Color(0xfff42e2a),
-        margin: EdgeInsets.fromLTRB(2, 0, 2, 4),
-        width: unitCell,
-        height: unitCell,
-        child: Center(
-            child: Text(
-          operationSign,
-          style: TextStyle(color: Color(0xffc4ebe8), fontSize: 22),
-        )));
+    return GestureDetector(
+      onTap: () {
+        callback(operationSign);
+      },
+      child: Container(
+          color: Color(0xfff42e2a),
+          margin: EdgeInsets.fromLTRB(2, 0, 2, 4),
+          width: unitCell,
+          height: unitCell,
+          child: Center(
+              child: Text(
+            operationSign,
+            style: TextStyle(color: Color(0xffc4ebe8), fontSize: 22),
+          ))),
+    );
   }
 }
 

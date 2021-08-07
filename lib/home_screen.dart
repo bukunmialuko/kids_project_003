@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:math_expressions/math_expressions.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -9,121 +10,160 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // var red = #f42e2a
-  // var grey = #2d3541
-  // var whitish = #c4ebe8
-  // https://imagecolorpicker.com/en amazing website, it shows complimentary colors
-
-  // num numberOnScreen = 0;
-  // num numberInMemory = 0;
-  // String operation = "";
-
   @override
   Widget build(BuildContext context) {
-    // var unitCell = MediaQuery.of(context).size.width / 4;
+    var unitCell = MediaQuery.of(context).size.width / 4;
     return Scaffold(
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Color(0xff191a1a),
+        brightness: Brightness.dark, // status bar brightness
+      ),
       backgroundColor: Color(0xff191a1a),
-      body: SafeArea(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            Spacer(),
-            Center(
-                child: Text(
-              "CALCULATOR",
-              style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold),
-            )),
-            Spacer(),
-            Row(
+      body: SingleChildScrollView(
+        child: SafeArea(
+          child: Container(
+            child: Column(
+              // mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Expanded(child: ResultScreen(value: _history)),
-                ClearSquareButton(operationSign: "c", callback: allClear),
+                SizedBox(height: 32),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      "CALCULATOR APP",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 32),
+                Row(
+                  children: [
+                    Expanded(
+                        child: Container(
+                            color: Color(0xff2d3541),
+                            margin: EdgeInsets.fromLTRB(2, 0, 2, 4),
+                            height: unitCell,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(
+                                    _expression,
+                                    style: TextStyle(
+                                        color: Color(0xffc4ebe8), fontSize: 22),
+                                  ),
+                                )
+                              ],
+                            ))),
+                    ClearSquareButton(operationSign: "c", callback: allClear),
+                  ],
+                ),
+                Row(
+                  children: [
+                    NumberSquareButton(
+                      value: '1',
+                      callback: numClick,
+                    ),
+                    NumberSquareButton(value: '2', callback: numClick),
+                    NumberSquareButton(
+                      value: '3',
+                      callback: numClick,
+                    ),
+                    OperationSquareButton(
+                      operationSign: "+",
+                      callback: numClick,
+                    )
+                  ],
+                ),
+                Row(
+                  children: [
+                    NumberSquareButton(
+                      value: '4',
+                      callback: numClick,
+                    ),
+                    NumberSquareButton(
+                      value: '5',
+                      callback: numClick,
+                    ),
+                    NumberSquareButton(
+                      value: '6',
+                      callback: numClick,
+                    ),
+                    OperationSquareButton(
+                      operationSign: "-",
+                      callback: numClick,
+                    )
+                  ],
+                ),
+                Row(
+                  children: [
+                    NumberSquareButton(
+                      value: "7",
+                      callback: numClick,
+                    ),
+                    NumberSquareButton(
+                      value: "8",
+                      callback: numClick,
+                    ),
+                    NumberSquareButton(
+                      value: "9",
+                      callback: numClick,
+                    ),
+                    OperationSquareButton(
+                      operationSign: "*",
+                      callback: numClick,
+                    )
+                  ],
+                ),
+                Row(
+                  children: [
+                    OperationSquareButton(
+                      operationSign: "/",
+                      callback: numClick,
+                    ),
+                    NumberSquareButton(value: "0", callback: numClick),
+                    OperationSquareButton(
+                      operationSign: ".",
+                      callback: numClick,
+                    ),
+                    OperationSquareButton(
+                      operationSign: "=",
+                      callback: evaluate,
+                    )
+                  ],
+                ),
+                SizedBox(height: 32),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Developed by Bukunmi",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
               ],
             ),
-            Row(
-              children: [
-                NumberSquareButton(
-                  value: '1',
-                  callback: numClick,
-                ),
-                NumberSquareButton(value: '2', callback: numClick),
-                NumberSquareButton(
-                  value: '3',
-                  callback: numClick,
-                ),
-                OperationSquareButton(
-                  operationSign: "+",
-                  callback: numClick,
-                )
-              ],
-            ),
-            Row(
-              children: [
-                NumberSquareButton(
-                  value: '4',
-                  callback: numClick,
-                ),
-                NumberSquareButton(
-                  value: '5',
-                  callback: numClick,
-                ),
-                NumberSquareButton(
-                  value: '6',
-                  callback: numClick,
-                ),
-                OperationSquareButton(
-                  operationSign: "-",
-                  callback: numClick,
-                )
-              ],
-            ),
-            Row(
-              children: [
-                NumberSquareButton(
-                  value: "7",
-                  callback: numClick,
-                ),
-                NumberSquareButton(
-                  value: "8",
-                  callback: numClick,
-                ),
-                NumberSquareButton(
-                  value: "9",
-                  callback: numClick,
-                ),
-                OperationSquareButton(
-                  operationSign: "*",
-                  callback: numClick,
-                )
-              ],
-            ),
-            Row(
-              children: [
-                OperationSquareButton(
-                  operationSign: "/",
-                  callback: numClick,
-                ),
-                NumberSquareButton(value: "0", callback: numClick),
-                OperationSquareButton(
-                  operationSign: ".",
-                  callback: numClick,
-                ),
-                OperationSquareButton(
-                  operationSign: "=",
-                  callback: evaluate,
-                )
-              ],
-            )
-          ],
+          ),
         ),
       ),
     );
   }
 
-  String _history = '';
   String _expression = '';
 
   void numClick(String text) {
@@ -133,13 +173,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void allClear(String text) {
-    setState(() {
-      _history = '';
-      _expression = '';
-    });
-  }
-
-  void clear(String text) {
     setState(() {
       _expression = '';
     });
@@ -151,7 +184,6 @@ class _HomeScreenState extends State<HomeScreen> {
     ContextModel cm = ContextModel();
 
     setState(() {
-      _history = _expression;
       _expression = exp.evaluate(EvaluationType.REAL, cm).toString();
     });
   }
@@ -238,37 +270,5 @@ class ClearSquareButton extends StatelessWidget {
             style: TextStyle(color: Color(0xffc4ebe8), fontSize: 22),
           ))),
     );
-  }
-}
-
-class ResultScreen extends StatelessWidget {
-  final String value;
-  const ResultScreen({
-    Key? key,
-    required this.value,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    var unitCell = (MediaQuery.of(context).size.width / 4);
-
-    return Container(
-        color: Color(0xff2d3541),
-        margin: EdgeInsets.fromLTRB(2, 0, 2, 4),
-        // width: unitCellWidth,
-        height: unitCell,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                value,
-                style: TextStyle(color: Color(0xffc4ebe8), fontSize: 22),
-              ),
-            )
-          ],
-        ));
   }
 }
